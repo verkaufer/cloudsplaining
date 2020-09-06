@@ -26,8 +26,14 @@
   <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
   <style>
     body {
-      background-color: #f5f5f8
+      background-color: #fcfcfc;
     }
+
+    .report {
+      background-color: #fff;
+      border: 1px solid #b7c8d6;
+    }
+
   </style>
 </head>
 <body>
@@ -53,14 +59,25 @@
       </b-collapse>
     </b-navbar>
   </div>
-  <b-container class="mt-3">
-    <b-row class="mb-3">
-      <b-col>
+  <b-container class="mt-3 pb-3 report">
+    <b-row class="my-3">
+      <b-col cols="*" sm="9">
         <h1>Executive Summary</h1>
+      </b-col>
+      <b-col>
+        <div class="mt-2">
+          <b-form-select v-model="policyFilter">
+            <b-form-select-option value="none">Show all policies</b-form-select-option>
+            <b-form-select-option value="inlinePolicies">Inline policies only</b-form-select-option>
+            <b-form-select-option value="custManaged">Customer managed policies</b-form-select-option>
+            <b-form-select-option value="awsManaged">AWS managed policies</b-form-select-option>
+
+          </b-form-select>
+        </div>
       </b-col>
     </b-row>
     <b-row class="mb-3">
-      <b-col md="8">
+      <b-col lg="8">
         <div style="" class="d-none d-sm-block">
           <summary-bar-chart
             :inline-policy-risks="inlinePolicyRisks"
@@ -81,22 +98,22 @@
           <b-tbody>
             <b-tr>
               <b-th>Privilege Escalation</b-th>
-              <b-td>{{ inlinePolicyRisks.PrivilegeEscalation }}</b-td>
+              <b-td>{{ policyRisks.PrivilegeEscalation }}</b-td>
               <b-td>high</b-td>
             </b-tr>
             <b-tr>
               <b-th>Data Exfiltration</b-th>
-              <b-td>{{ inlinePolicyRisks.DataExfiltration }}</b-td>
+              <b-td>{{ policyRisks.DataExfiltration }}</b-td>
               <b-td>low</b-td>
             </b-tr>
             <b-tr>
               <b-th>Resource Exposure</b-th>
-              <b-td>{{ inlinePolicyRisks.ResourceExposure }}</b-td>
+              <b-td>{{ policyRisks.ResourceExposure }}</b-td>
               <b-td>med</b-td>
             </b-tr>
             <b-tr>
               <b-th>Infrastructure Modification</b-th>
-              <b-td>{{ inlinePolicyRisks.InfrastructureModification }}</b-td>
+              <b-td>{{ policyRisks.InfrastructureModification }}</b-td>
               <b-td>low</b-td>
             </b-tr>
 
@@ -105,59 +122,66 @@
       </b-col>
 
     </b-row>
-    <b-row>
-      <b-col>
-        <b-card-group deck>
-          <b-card
-            title="IAM Principals">
-            <div>
-              <h6 class="text-muted">Policy Violations</h6>
-            </div>
-            <h3 class="text-center">
-              {{ iamPrincipalRisks }}
-            </h3>
-            <template v-slot:footer>
-              <small class="text-muted">
-                <b-link href="#">Learn More</b-link>
-              </small>
-            </template>
-          </b-card>
-          <b-card
-            title="IAM Roles">
-            <div>
-              <h6 class="text-muted">Policy Violations</h6>
-            </div>
-            <h3 class="text-center">
-              {{ iamRoleRisks }}
-            </h3>
-            <template v-slot:footer>
-              <small class="text-muted">
-                <b-link href="#">Learn More</b-link>
-              </small>
-            </template>
-          </b-card>
-          <b-card
-            title="IAM Groups">
-            <div>
-              <h6 class="text-muted">Policy Violations</h6>
-            </div>
-            <h3 class="text-center">
-              {{ iamGroupRisks }}
-            </h3>
-            <template v-slot:footer>
-              <small class="text-muted">
-                <b-link href="#">Learn More</b-link>
-              </small>
-            </template>
-          </b-card>
-          <div class="w-100"></div>
-        </b-card-group>
-      </b-col>
-    </b-row>
-    <b-row>
 
-      <div class="w-100"></div>
-    </b-row>
+    <div id="principalId">
+      <b-container>
+        <b-row class="px-2">
+          <b-col>
+            <h4>
+              MyRole
+              <small class="text-muted">arn:aws:iam::012345678901:role/MyRole</small>
+            </h4>
+          </b-col>
+          <b-col>
+            <b-button v-b-toggle.principal-id-collapse>
+             Show
+            </b-button>
+          </b-col>
+
+        </b-row>
+        <b-collapse id="principal-id-collapse">
+          <b-row>
+
+            <b-col lg="4">
+              <h5>Risks</h5>
+              <b-list-group>
+                <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+                  Data Exfiltration
+                  <b-badge variant="warning">9 <span class="sr-only">data exfiltration risks</span></b-badge>
+                </b-list-group-item>
+                <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+                  Privilege Escalation
+                  <b-badge variant="danger">3 <span class="sr-only">privilege escalation risks</span></b-badge>
+                </b-list-group-item>
+                <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+                  Resource Exposure
+                  <b-badge variant="warning">3 <span class="sr-only">resource exposure risks</span></b-badge>
+                </b-list-group-item>
+                <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+                  Infrastructure Modification
+                  <b-badge variant="info">3 <span class="sr-only">infrastructure modification risks</span></b-badge>
+                </b-list-group-item>
+              </b-list-group>
+            </b-col>
+            <b-col>
+              <h5>Metadata</h5>
+              <dl class="row">
+                <dt class="col-sm-3">Created</dt>
+                <dd class="col-sm-9">2019-08-16 17:27:59+00:00</dd>
+
+                <dt class="col-sm-3">ARN</dt>
+                <dd class="col-sm-9 text-monospace">arn:aws:iam::012345678901:role/MyRole</dd>
+
+              </dl>
+            </b-col>
+          </b-row>
+        </b-collapse>
+
+      </b-container>
+    </div>
+
+  </b-container>
+  <b-container>
     <b-row class="mt-5">
       <b-col class="text-center text-muted">
         Report Generated: 2020-08-06 &diamond;
@@ -168,7 +192,84 @@
   </b-container>
 </div>
 
+
+<script type="text/x-template" id="principal">
+  <div id="{{ principalId }}">
+    <b-container>
+      <b-row class="px-2">
+        <h2>MyRole</h2>
+      </b-row>
+      <b-row>
+
+        <b-col lg="4">
+          <h4>Risks</h4>
+          <b-list-group>
+            <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+              Data Exfiltration
+              <b-badge variant="warning">9 <span class="sr-only">data exfiltration risks</span></b-badge>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+              Privilege Escalation
+              <b-badge variant="danger">3 <span class="sr-only">privilege escalation risks</span></b-badge>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+              Resource Exposure
+              <b-badge variant="warning">3 <span class="sr-only">resource exposure risks</span></b-badge>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center" :action="true">
+              Infrastructure Modification
+              <b-badge variant="info">3 <span class="sr-only">infrastructure modification risks</span></b-badge>
+            </b-list-group-item>
+          </b-list-group>
+        </b-col>
+        <b-col>
+          <h4>Metadata</h4>
+          <dl class="row">
+            <dt class="col-sm-3">Created</dt>
+            <dd class="col-sm-9">2019-08-16 17:27:59+00:00</dd>
+
+            <dt class="col-sm-3">ARN</dt>
+            <dd class="col-sm-9 text-monospace">arn:aws:iam::012345678901:role/MyRole</dd>
+
+          </dl>
+        </b-col>
+      </b-row>
+
+    </b-container>
+  </div>
+</script>
+<script src="chart.js">
+
+</script>
 <script>
+  const IamPrincipal = {
+    props: ["principal"],
+    methods: {
+      riskIndicator(riskType) {
+
+        let risks = Object.keys(this.principal.managed_policies)
+
+        return this.principal["managed_policies"]
+      }
+    }
+  }
+</script>
+
+<script>
+
+  const principalsUsingPolicy = (principals, policyId) => {
+
+    const usingPolicy = [];
+    Object.keys(principals).forEach((principal, idx) => {
+      const {managed_policies} = principals[principal]
+      if (managed_policies.hasOwnProperty(policyId)) {
+        usingPolicy.push(principal);
+      }
+    });
+
+    return usingPolicy;
+  }
+
   const calculateRisks = (iamResource) => {
     return Object.values(iamResource)
       .reduce(
@@ -195,67 +296,6 @@
     }
   }
 
-  var SummaryBarChart = {
-    extends: VueChartJs.Bar,
-    props: ["inlinePolicyRisks", "managedPolicyRisks"],
-    computed: {
-      myStyles () {
-        return {
-          height: "100%"
-        }
-      }
-    },
-    data: function () {
-      return {
-
-        chartData: {
-          labels: [
-            "Privilege Escalation",
-            "Data Exfiltration",
-            "Resource Exposure",
-            "Infrastructure Modification"
-          ],
-          datasets: [{
-            label: "Inline Policies",
-            data: [6, 3, 10, 9],//Object.values(this.inlinePolicyRisks),
-            backgroundColor: [
-              "#f87979",
-              "#f87979",
-              "#f87979",
-              "#f87979",
-            ]
-          },
-            {
-              label: "Managed Policies",
-              backgroundColor: [
-                "#2247c6",
-                "#2247c6",
-                "#2247c6",
-                "#2247c6",
-                "#2247c6",
-              ],
-              data: [9, 10, 15, 20]//Object.values(this.managedPolicyRisks)
-            }]
-        },
-        options: {
-          responsive: true,
-          legend: {display: true, position: "bottom"},
-          scales: {
-            xAxes: [{
-              stacked: true,
-            }],
-            yAxes: [{
-              stacked: true
-            }]
-          },
-
-        }
-      }
-    },
-    mounted() {
-      this.renderChart(this.chartData, this.options)
-    }
-  };
 
   window.app = new Vue({
     el: "#app",
@@ -264,15 +304,34 @@
     },
     data: {
       privateState: {},
-      sharedState: window.__REPORT__ || {},
-      sharedStateV2: window.__REPORT2__ || {},
+      sharedState: window.__REPORT2__ || {},
+      policyFilter: "none",
     },
     computed: {
       inlinePolicyRisks() {
-        return policyViolations(this.sharedStateV2["inline-policies"])
+        return policyViolations(this.sharedState["inline-policies"])
       },
       managedPolicyRisks() {
-        return policyViolations(this.sharedStateV2["managed-policies"])
+        return policyViolations(this.sharedState["managed-policies"])
+      },
+
+      policyRisks() {
+
+        if (this.policyFilter === "inlinePolicies") {
+          return this.inlinePolicyRisks
+        }
+
+        if (["custManaged", "awsManaged"].indexOf(this.policyFilter) !== -1 ) {
+          return this.managedPolicyRisks;
+        }
+        if (this.policyFilter === "none") {
+          return {
+              "PrivilegeEscalation": this.inlinePolicyRisks.PrivilegeEscalation + this.managedPolicyRisks.PrivilegeEscalation,
+              "DataExfiltration": this.inlinePolicyRisks.DataExfiltration + this.managedPolicyRisks.DataExfiltration,
+              "ResourceExposure": this.inlinePolicyRisks.ResourceExposure + this.managedPolicyRisks.ResourceExposure,
+              "InfrastructureModification": this.inlinePolicyRisks.InfrastructureModification + this.managedPolicyRisks.InfrastructureModification
+          }
+        }
       },
 
       iamPrincipalRisks() {
@@ -285,6 +344,9 @@
 
       iamGroupRisks() {
         return calculateRisks(this.sharedState.groups)
+      },
+      principalsPolicy() {
+        return principalsUsingPolicy(this.sharedState.users, "ANPAIWMBCKSKIEE64ZLYK")
       }
     }
   })
